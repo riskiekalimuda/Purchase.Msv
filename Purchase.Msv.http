@@ -1,0 +1,6 @@
+@Purchase.Msv_HostAddress = http://localhost:5219
+
+GET {{Purchase.Msv_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
