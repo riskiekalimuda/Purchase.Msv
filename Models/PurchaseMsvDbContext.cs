@@ -17,65 +17,65 @@ namespace Purchase.Msv.Models
         {
         }
 
-        public virtual DbSet<Purchase> Purchases { get; set; }    
+        public virtual DbSet<TrxPurchase> TrxPurchases { get; set; }    
 
-        public virtual DbSet<Purchasedetail> Purchasedetails { get; set; }    
+        public virtual DbSet<TrxPurchaseDetail> TrxPurchaseDetails { get; set; }    
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
             => optionsBuilder.UseNpgsql("Name=ConnectionStrings:PurchaseMsvDBConnection");
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Purchase>(entity =>
+            modelBuilder.Entity<TrxPurchase>(entity =>
             {
-                entity.HasKey(e => e.Id).HasName("purchases_pkey");
+                entity.HasKey(e => e.Id).HasName("trx_purchase_pkey");
 
-                entity.ToTable("purchases");
+                entity.ToTable("trx_purchase");
 
-                entity.HasIndex(e => e.Purchasenumber, "purchases_purchasenumber_key").IsUnique();
+                entity.HasIndex(e => e.PurchaseNumber, "trx_purchase_purchase_number_key").IsUnique();
 
                 entity.Property(e => e.Id)
-                .ValueGeneratedNever()
+                .HasDefaultValueSql("gen_random_uuid()")
                 .HasColumnName("id");
-                entity.Property(e => e.Purchasedate)
+                entity.Property(e => e.PurchaseDate)
                 .HasDefaultValueSql("CURRENT_TIMESTAMP")
-                .HasColumnName("purchasedate");
-                entity.Property(e => e.Purchasenumber)
+                .HasColumnName("purchase_date");
+                entity.Property(e => e.PurchaseNumber)
                 .HasMaxLength(50)
-                .HasColumnName("purchasenumber");
+                .HasColumnName("purchase_number");
                 entity.Property(e => e.Status)
                 .HasMaxLength(20)
                 .HasDefaultValueSql("'Pending'::character varying")
                 .HasColumnName("status");
-                entity.Property(e => e.Supplierid).HasColumnName("supplierid");
-                entity.Property(e => e.Totalamount)
+                entity.Property(e => e.SupplierId).HasColumnName("supplier_id");
+                entity.Property(e => e.TotalAmount)
                 .HasPrecision(18, 2)
-                .HasColumnName("totalamount");
+                .HasColumnName("total_amount");
             });
 
-            modelBuilder.Entity<Purchasedetail>(entity =>
+            modelBuilder.Entity<TrxPurchaseDetail>(entity =>
             {
-                entity.HasKey(e => e.Id).HasName("purchasedetails_pkey");
+                entity.HasKey(e => e.Id).HasName("trx_purchase_detail_pkey");
 
-                entity.ToTable("purchasedetails");
+                entity.ToTable("trx_purchase_detail");
 
                 entity.Property(e => e.Id)
-                .ValueGeneratedNever()
+                .HasDefaultValueSql("gen_random_uuid()")
                 .HasColumnName("id");
-                entity.Property(e => e.Productid).HasColumnName("productid");
-                entity.Property(e => e.Purchaseid).HasColumnName("purchaseid");
+                entity.Property(e => e.ProductId).HasColumnName("product_id");
+                entity.Property(e => e.PurchaseId).HasColumnName("purchase_id");
                 entity.Property(e => e.Quantity).HasColumnName("quantity");
-                entity.Property(e => e.Totalprice)
+                entity.Property(e => e.TotalPrice)
                 .HasPrecision(18, 2)
-                .HasComputedColumnSql("((quantity)::numeric * unitprice)", true)
-                .HasColumnName("totalprice");
-                entity.Property(e => e.Unitprice)
+                .HasComputedColumnSql("((quantity)::numeric * unit_price)", true)
+                .HasColumnName("total_price");
+                entity.Property(e => e.UnitPrice)
                 .HasPrecision(18, 2)
-                .HasColumnName("unitprice");
+                .HasColumnName("unit_price");
 
-                entity.HasOne(d => d.Purchase).WithMany(p => p.Purchasedetails)
-                .HasForeignKey(d => d.Purchaseid)
-                .HasConstraintName("purchasedetails_purchaseid_fkey");
+                entity.HasOne(d => d.Purchase).WithMany(p => p.TrxPurchaseDetails)
+                .HasForeignKey(d => d.PurchaseId)
+                .HasConstraintName("trx_purchase_detail_purchase_id_fkey");
             });
 
             this.OnModelCreatingPartial(modelBuilder);

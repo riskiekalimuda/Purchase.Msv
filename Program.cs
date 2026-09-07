@@ -4,6 +4,7 @@ using MessageMQCommon.Parameters;
 using Microsoft.EntityFrameworkCore;
 using Purchase.Msv.Models;
 using Purchase.Msv.Profiles;
+using Purchase.Msv.Services;
 
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
@@ -16,6 +17,8 @@ builder.Services.AddAutoMapper(x=>{ },
 typeof(MappingProfile).Assembly);   
 
 builder.Services.AddControllers();
+
+builder.Services.AddScoped<PurchaseService>();
 
 var rabbitMQSetting = builder.Configuration.GetSection("RabbitMqSettings").Get<RabbitMQParameter>()?? new RabbitMQParameter(); 
 
