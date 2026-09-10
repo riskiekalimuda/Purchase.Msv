@@ -42,6 +42,16 @@ namespace Purchase.Msv.Controllers
             {
                 return BadRequest(purchaseResult.ErrorMessage);
             }
+
+            if (!Request.Headers.TryGetValue("X-User-Id", out var userIdStr) || string.IsNullOrEmpty(userIdStr))
+            {
+                return Unauthorized("Unauthorized: User info not found in headers.");
+            }
+
+            if (!Guid.TryParse(userIdStr.ToString(), out Guid userId))
+            {
+                return BadRequest("Invalid User ID format.");
+            }
             try {
                 var message = _mapper.Map<PurchaseMessage>(purchaseResult.Data);
                 var sendEndpoint = await _sendEndpointProvider.GetSendEndpoint(new Uri($"queue:{QueueNames.PurchaseQueue.PurchaseCreatedQueue}"));
