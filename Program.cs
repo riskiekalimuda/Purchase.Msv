@@ -4,6 +4,7 @@ using MessageMQCommon.MQ.Names;
 using MessageMQCommon.Parameters;
 using Microsoft.EntityFrameworkCore;
 using Purchase.Msv.Consumers;
+using Purchase.Msv.Extensions;
 using Purchase.Msv.Models;
 using Purchase.Msv.Profiles;
 using Purchase.Msv.Services;
@@ -11,6 +12,8 @@ using Purchase.Msv.Services;
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddPurchaseTelemetry(builder.Configuration);
 
 builder.Services.AddDbContext<PurchaseMsvDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("PurchaseMsvDBConnection"))); 
