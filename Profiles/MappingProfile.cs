@@ -23,6 +23,12 @@ namespace Purchase.Msv.Profiles
                 .ForMember(dest => dest.Details, opt => opt.MapFrom(src => src.TrxPurchaseDetails));
 
             CreateMap<TrxPurchaseDetail, PurchaseDetailMessage>();
+            CreateMap<UpdatePurchaseRequest, TrxPurchase>()
+                .ForMember(dest=>dest.TrxPurchaseDetails, opt=>opt.MapFrom(src=>src.UpdatePurchaseDetailRequest));
+            CreateMap<UpdatePurchaseRequestDetail, TrxPurchaseDetail>();
+            CreateMap<TrxPurchase, UpdatePurchaseMessage>()
+                .ForMember(dest=>dest.ListUpdatePurchaseDetails, opt=>opt.MapFrom(src=>src.TrxPurchaseDetails));
+            CreateMap<TrxPurchaseDetail, UpdatePurchaseDetail>();
         }
     }
 }

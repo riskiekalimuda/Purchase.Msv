@@ -19,7 +19,7 @@ namespace Purchase.Msv.Consumers
             var purchaseCreatedResult = context.Message;
             try
             {
-                var updateResult = await _purchaseService.UpdatePurchaseResult(purchaseCreatedResult);
+                var updateResult = await _purchaseService.UpdateStatusPurchaseResult(purchaseCreatedResult);
                 _logger.LogInformation($"PurchaseCreatedResultMessage: PurchaseNumber={purchaseCreatedResult.PurchaseNumber}, Result={purchaseCreatedResult.PurchaseResult}");
 
             }

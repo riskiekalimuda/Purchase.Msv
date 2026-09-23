@@ -33,16 +33,6 @@ namespace Purchase.Msv.Controllers
         [HttpPost("CreatePurchase")]
         public async Task<IActionResult> CreatePurchase([FromBody] CreatePurchaseRequest purchase)
         {
-            if(purchase == null)
-            {
-                return BadRequest("Purchase data is required.");
-            }
-            var purchaseResult = await _purchaseService.CreatePurchaseAsync(purchase);
-            if (!purchaseResult.IsSuccess)
-            {
-                return BadRequest(purchaseResult.ErrorMessage);
-            }
-
             if (!Request.Headers.TryGetValue("X-User-Id", out var userIdStr) || string.IsNullOrEmpty(userIdStr))
             {
                 return Unauthorized("Unauthorized: User info not found in headers.");
@@ -52,18 +42,53 @@ namespace Purchase.Msv.Controllers
             {
                 return BadRequest("Invalid User ID format.");
             }
-            try {
+
+            if (purchase == null)
+            {
+                return BadRequest("Purchase data is required.");
+            }
+            var purchaseResult = await _purchaseService.CreatePurchaseAsync(purchase);
+            if (!purchaseResult.IsSuccess)
+            {
+                return BadRequest(purchaseResult.ErrorMessage);
+            }
+            try
+            {
                 var message = _mapper.Map<PurchaseMessage>(purchaseResult.Data);
                 var sendEndpoint = await _sendEndpointProvider.GetSendEndpoint(new Uri($"queue:{QueueNames.PurchaseQueue.PurchaseCreatedQueue}"));
                 await sendEndpoint.Send(message);
                 await _dbContext.SaveChangesAsync();
-                return Ok(new {PurchaseId= purchaseResult.Data.PurchaseNumber, Message= "Purchase created successfully."}); 
+                return Ok(new { PurchaseId = purchaseResult.Data.PurchaseNumber, Message = "Purchase created successfully." });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error occurred while sending purchase created event.");
                 return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request.");
-            }   
+            }
+        }
+
+        [HttpPost("Update")]
+        public async Task<IActionResult> UpdatePurchase([FromBody] UpdatePurchaseRequest updatePurchaseRequest)
+        {
+            if (!Request.Headers.TryGetValue("X-User-Id", out var userIdStr) || string.IsNullOrEmpty(userIdStr))
+            {
+                return Unauthorized("Unauthorized: User info not found in headers.");
+            }
+
+            if (!Guid.TryParse(userIdStr.ToString(), out Guid userId))
+            {
+                return BadRequest("Invalid User ID format.");
+            }
+            if (updatePurchaseRequest == null)
+            {
+                return BadRequest("Payload is null");
+            }
+            var result = await _purchaseService.UpdatePurchaseAsync(updatePurchaseRequest);
+            if (!result.IsSuccess)
+            {
+                return BadRequest($"Update failled, with error: {result.ErrorMessage}.");
+            }
+            return Ok($"Update purchase no: {result.Data.PurchaseNumber} was successfully.");
         }
     }
 }
