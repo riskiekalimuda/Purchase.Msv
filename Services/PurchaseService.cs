@@ -85,6 +85,12 @@ namespace Purchase.Msv.Services
                 var purchaseEntity = _mapper.Map<TrxPurchase>(purchase);
                 _dbContext.TrxPurchases.Add(purchaseEntity);
                 await _dbContext.SaveChangesAsync();
+
+                var message = _mapper.Map<PurchaseMessage>(purchaseEntity);
+                var sendEndpoint = await _sendEndpointProvider.GetSendEndpoint(new Uri($"queue:{QueueNames.PurchaseQueue.PurchaseCreatedQueue}"));
+                await sendEndpoint.Send(message);
+                await _dbContext.SaveChangesAsync();
+
                 return new ServiceResult<TrxPurchase>(true)
                 {
                     IsSuccess = true,

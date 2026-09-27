@@ -54,10 +54,6 @@ namespace Purchase.Msv.Controllers
             }
             try
             {
-                var message = _mapper.Map<PurchaseMessage>(purchaseResult.Data);
-                var sendEndpoint = await _sendEndpointProvider.GetSendEndpoint(new Uri($"queue:{QueueNames.PurchaseQueue.PurchaseCreatedQueue}"));
-                await sendEndpoint.Send(message);
-                await _dbContext.SaveChangesAsync();
                 return Ok(new { PurchaseId = purchaseResult.Data.PurchaseNumber, Message = "Purchase created successfully." });
             }
             catch (Exception ex)
